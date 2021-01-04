@@ -8,6 +8,12 @@ const os = osu.os;
 
 let cpuOverload = 10;
 
+notifyUser({
+    title: 'CPU OVELOAD',
+    body: `CPU is over ${cpuOverload}%`,
+    icon: path.join(__dirname, 'img', 'icon.png' )
+})
+
 //Run Every 2 Seconds
 setInterval(() => {
     //CPU USAGE
@@ -59,3 +65,8 @@ document.getElementById('os').innerText = `${os.type()} ${os.arch()}`;
 mem.info().then(info => {
     document.getElementById('mem-total').innerText = info.totalMemMb;
 })
+
+//Send notificaiton
+function notifyUser(options) {
+    new Notification(options.title, options)
+}
