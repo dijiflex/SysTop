@@ -1,6 +1,6 @@
 const { app, BrowserWindow, Menu } = require('electron')
 const log = require('electron-log')
-
+ 
 // Set env
 process.env.NODE_ENV = 'development'
 
