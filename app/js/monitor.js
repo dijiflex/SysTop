@@ -6,13 +6,9 @@ const cpu = osu.cpu;
 const men = osu.mem;
 const os = osu.os;
 
-let cpuOverload = 10;
+let cpuOverload = 5;
+let alertFrequeny = 2;
 
-notifyUser({
-    title: 'CPU OVELOAD',
-    body: `CPU is over ${cpuOverload}%`,
-    icon: path.join(__dirname, 'img', 'icon.png' )
-})
 
 //Run Every 2 Seconds
 setInterval(() => {
@@ -27,6 +23,17 @@ setInterval(() => {
             document.getElementById('cpu-progress').style.background = 'red';
         } else{
             document.getElementById('cpu-progress').style.background = '#30c88b';
+        }
+
+        //Check overload
+        if(info > cpuOverload && runNotify(alertFrequeny)){
+            notifyUser({
+                title: 'CPU OVELOAD',
+                body: `CPU is over ${cpuOverload}%`,
+                icon: path.join(__dirname, 'img', 'icon.png' )
+            })
+
+            localStorage.setItem('lastNofity', +new Date())
         }
     });
 
@@ -69,4 +76,27 @@ mem.info().then(info => {
 //Send notificaiton
 function notifyUser(options) {
     new Notification(options.title, options)
+}
+
+//Check how much time has passed since notification
+function runNotify(frequency) { 
+    if(localStorage.getItem('lastNofity') === null){
+
+        //Store timestamp
+        localStorage.setItem('lastNofity', +new Date())
+        return true;
+    }
+
+    const notifyTime = new Date(parseInt(localStorage.getItem('lastNofity')));
+    const now = new Date();
+
+    const diffTime = Math.abs(now - notifyTime);
+
+    const minutesPassed = Math.ceil(diffTime /  (1000 * 60))
+
+    if(minutesPassed > frequency){
+        return true
+    } else {
+        return false;
+    }
 }
