@@ -6,7 +6,7 @@ const cpu = osu.cpu;
 const men = osu.mem;
 const os = osu.os;
 
-let cpuOverload = 5;
+let cpuOverload = 80;
 let alertFrequeny = 2;
 
 
