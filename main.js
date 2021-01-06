@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain } = require('electron')
 const log = require('electron-log');
 const Store = require('./Store')
  
@@ -15,8 +15,8 @@ const store = new Store({
     configName: 'user-settings',
     defaults: {
         settings: {
-            cpuOveload: 80,
-            alertFrequecy: 5
+            cpuOverload : 80,
+            alertFrequency : 5
         }
     }
 })
@@ -43,6 +43,10 @@ function createMainWindow() {
 app.on('ready', () => {
   createMainWindow()
 
+  mainWindow.webContents.on('dom-ready', () => {
+      mainWindow.webContents.send('settings:get', store.get('settings'))
+  })
+
   const mainMenu = Menu.buildFromTemplate(menu)
   Menu.setApplicationMenu(mainMenu)
 })
@@ -66,6 +70,12 @@ const menu = [
       ]
     : []),
 ]
+
+//Set Settings
+ipcMain.on('settings:set', (e, value) => {
+    store.set('settings', value);
+    mainWindow.webContents.send('settings:get', store.get('settings')) 
+})
 
 app.on('window-all-closed', () => {
   if (!isMac) {
