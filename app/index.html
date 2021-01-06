@@ -65,6 +65,7 @@
         <script src="js/monitor.js"></script>
         <script>
             const settingsFrom = document.getElementById('settings-form')
+            const navv =   document.getElementById('nav')
 
             //Get Default settings
             ipcRenderer.on('settings:get', (e, settings) => {
@@ -99,7 +100,10 @@
                     }, 3000);
                 }
 
-            
+        //    toggle mav
+        ipcRenderer.on('nav:toggle', ()=>{
+          nav.classList.toggle('hide')
+        })
 
         </script>
 	</body>
