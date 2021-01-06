@@ -1,10 +1,11 @@
 
-const { app, Menu, ipcMain, Tray } = require('electron');
-const path = require('path')
+const { app, Menu, ipcMain } = require('electron');
+const path = require('path');
 const log = require('electron-log');
 const Store = require('./Store');
 const MainWindow = require('./MainWindow')
- 
+const AppTray = require('./AppTray')
+
 // Set env
 process.env.NODE_ENV = 'development'
 
@@ -19,72 +20,49 @@ const store = new Store({
     configName: 'user-settings',
     defaults: {
         settings: {
-            cpuOverload : 80,
-            alertFrequency : 5
+            cpuOverload: 80,
+            alertFrequency: 5
         }
     }
 })
 
 function createMainWindow() {
-  mainWindow = new MainWindow('./app/index.html', isDev);
+    mainWindow = new MainWindow('./app/index.html', isDev);
 
- 
+
 }
 
 app.on('ready', () => {
-  createMainWindow()
+    createMainWindow()
 
-  mainWindow.webContents.on('dom-ready', () => {
-      mainWindow.webContents.send('settings:get', store.get('settings'))
-  })
+    mainWindow.webContents.on('dom-ready', () => {
+        mainWindow.webContents.send('settings:get', store.get('settings'))
+    })
 
-  mainWindow.on('close', e => {
-      if(!app.isQuitting){
-          e.preventDefault();
-          mainWindow.hide();
-      }
+    mainWindow.on('close', e => {
+        if (!app.isQuitting) {
+            e.preventDefault();
+            mainWindow.hide();
+        }
 
-      return true;
-  })
+        return true;
+    })
 
-  const icon = path.join(__dirname, 'assets', 'icons', 'tray_icon.png');
+    const icon = path.join(__dirname, 'assets', 'icons', 'tray_icon.png');
 
-  //Create Tray
-  tray = new Tray(icon);
-  tray.on('click', () =>{
-      if(mainWindow.isVisible() == true){
-        mainWindow.hide();
-      } else {
-        mainWindow.show();
-      }
+    //Create Tray
+    tray = new AppTray(icon, mainWindow);
 
-      tray.on('right-click', () =>{
-          const contexMenu = Menu.buildFromTemplate([
-              {
-                  label: 'Quit',
-                  click: ()=> {
-                      app.isQuitting = true
-                      app.quit();
-                  }
-              }
-          ])
-
-
-          tray.popUpContextMenu(contexMenu)
-      })
-  })
-
-  
-  const mainMenu = Menu.buildFromTemplate(menu)
-  Menu.setApplicationMenu(mainMenu)
+    const mainMenu = Menu.buildFromTemplate(menu)
+    Menu.setApplicationMenu(mainMenu)
 })
 
 const menu = [
-  ...(isMac ? [{ role: 'appMenu' }] : []),
-  {
-    role: 'fileMenu',
-  },
-  {
+    ...(isMac ? [{ role: 'appMenu' }] : []),
+    {
+        role: 'fileMenu',
+    },
+    {
         label: 'View',
         submenu: [
             {
@@ -92,38 +70,38 @@ const menu = [
                 click: () => mainWindow.webContents.send('nav:toggle')
             }
         ]
-  },
-  ...(isDev
-    ? [
-        {
-          label: 'Developer',
-          submenu: [
-            { role: 'reload' },
-            { role: 'forcereload' },
-            { type: 'separator' },
-            { role: 'toggledevtools' },
-          ],
-        },
-      ]
-    : []),
+    },
+    ...(isDev
+        ? [
+            {
+                label: 'Developer',
+                submenu: [
+                    { role: 'reload' },
+                    { role: 'forcereload' },
+                    { type: 'separator' },
+                    { role: 'toggledevtools' },
+                ],
+            },
+        ]
+        : []),
 ]
 
 //Set Settings
 ipcMain.on('settings:set', (e, value) => {
     store.set('settings', value);
-    mainWindow.webContents.send('settings:get', store.get('settings')) 
+    mainWindow.webContents.send('settings:get', store.get('settings'))
 })
 
 app.on('window-all-closed', () => {
-  if (!isMac) {
-    app.quit()
-  }
+    if (!isMac) {
+        app.quit()
+    }
 })
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createMainWindow()
-  }
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createMainWindow()
+    }
 })
 
 app.allowRendererProcessReuse = true
