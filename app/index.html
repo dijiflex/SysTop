@@ -64,7 +64,6 @@
         <script src="js/tabs.js"></script>
         <script src="js/monitor.js"></script>
         <script>
-            const { ipcRenderer } = require('electron');
             const settingsFrom = document.getElementById('settings-form')
 
             //Get Default settings
@@ -86,7 +85,7 @@
                 })
 
                 showAlert('Save Settings')
-            })
+            });
 
              //Show Aller For settings
              function showAlert(msg) {
