@@ -52,6 +52,15 @@ app.on('ready', () => {
       mainWindow.webContents.send('settings:get', store.get('settings'))
   })
 
+  mainWindow.on('close', e => {
+      if(!app.isQuitting){
+          e.preventDefault();
+          mainWindow.hide();
+      }
+
+      return true;
+  })
+
   const icon = path.join(__dirname, 'assets', 'icons', 'tray_icon.png');
 
   //Create Tray
@@ -62,6 +71,21 @@ app.on('ready', () => {
       } else {
         mainWindow.show();
       }
+
+      tray.on('right-click', () =>{
+          const contexMenu = Menu.buildFromTemplate([
+              {
+                  label: 'Quit',
+                  click: ()=> {
+                      app.isQuitting = true
+                      app.quit();
+                  }
+              }
+          ])
+
+
+          tray.popUpContextMenu(contexMenu)
+      })
   })
 
   
